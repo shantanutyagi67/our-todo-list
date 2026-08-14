@@ -52,9 +52,10 @@ body {
   display: block;
   width: clamp(74px, 11vw, 148px);
   aspect-ratio: 1;
-  background-image: url("assets/cat-meme-stickers.png");
-  background-repeat: no-repeat;
-  background-size: 400% 300%;
+  border: 5px solid rgb(255 255 255 / 82%);
+  border-radius: 18px;
+  background: rgb(255 250 247 / 68%);
+  object-fit: cover;
   filter: drop-shadow(0 10px 16px rgb(118 59 75 / 14%));
 }
 
@@ -69,19 +70,6 @@ body {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-
-.sticker-1 { background-position: 0% 0%; }
-.sticker-2 { background-position: 33.333% 0%; }
-.sticker-3 { background-position: 66.666% 0%; }
-.sticker-4 { background-position: 100% 0%; }
-.sticker-5 { background-position: 0% 50%; }
-.sticker-6 { background-position: 33.333% 50%; }
-.sticker-7 { background-position: 66.666% 50%; }
-.sticker-8 { background-position: 100% 50%; }
-.sticker-9 { background-position: 0% 100%; }
-.sticker-10 { background-position: 33.333% 100%; }
-.sticker-11 { background-position: 66.666% 100%; }
-.sticker-12 { background-position: 100% 100%; }
 
 .page-shell {
   position: relative;
