@@ -4,6 +4,8 @@ This site uses Firebase Email/Password login. It does not show a sign-up button.
 You manually create accounts in Firebase, then allow those account UIDs in the
 Realtime Database rules.
 
+Signed-in users stay logged in on that device until they click Sign out.
+
 The website accepts either a real email address or a short username. Short
 usernames are converted to an email-shaped Firebase login. For example:
 

@@ -1,7 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
+  browserLocalPersistence,
   getAuth,
   onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -207,6 +209,7 @@ async function start() {
   try {
     const app = initializeApp(config);
     auth = getAuth(app);
+    await setPersistence(auth, browserLocalPersistence);
     todosRef = ref(getDatabase(app), "sharedTodos/date-night");
 
     onAuthStateChanged(auth, async (user) => {

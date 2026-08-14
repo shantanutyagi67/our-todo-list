@@ -32,28 +32,30 @@ body {
 
 .cat-row {
   position: absolute;
-  left: -45vw;
+  left: 0;
   display: flex;
   width: max-content;
-  gap: 18px;
+  gap: clamp(18px, 4vw, 52px);
   white-space: nowrap;
-  opacity: .43;
+  opacity: .52;
   animation: cat-drift var(--duration, 32s) linear infinite;
 }
 
-.cat-row span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 6px 12px;
-  border: 1px solid rgb(255 255 255 / 75%);
-  border-radius: 999px;
-  background: rgb(255 250 247 / 64%);
-  color: #7f5a67;
-  font-family: "DM Mono", monospace;
-  font-size: clamp(.62rem, 1.6vw, .78rem);
-  font-weight: 500;
-  box-shadow: 0 8px 24px rgb(118 59 75 / 8%);
+.cat-set {
+  display: flex;
+  flex: 0 0 auto;
+  gap: clamp(18px, 4vw, 52px);
+  padding-right: clamp(18px, 4vw, 52px);
+}
+
+.cat-sticker {
+  display: block;
+  width: clamp(74px, 11vw, 148px);
+  aspect-ratio: 1;
+  background-image: url("assets/cat-meme-stickers.png");
+  background-repeat: no-repeat;
+  background-size: 400% 300%;
+  filter: drop-shadow(0 10px 16px rgb(118 59 75 / 14%));
 }
 
 .cat-row--one { top: 5%; --duration: 34s; }
@@ -65,8 +67,21 @@ body {
 
 @keyframes cat-drift {
   from { transform: translateX(0); }
-  to { transform: translateX(95vw); }
+  to { transform: translateX(-50%); }
 }
+
+.sticker-1 { background-position: 0% 0%; }
+.sticker-2 { background-position: 33.333% 0%; }
+.sticker-3 { background-position: 66.666% 0%; }
+.sticker-4 { background-position: 100% 0%; }
+.sticker-5 { background-position: 0% 50%; }
+.sticker-6 { background-position: 33.333% 50%; }
+.sticker-7 { background-position: 66.666% 50%; }
+.sticker-8 { background-position: 100% 50%; }
+.sticker-9 { background-position: 0% 100%; }
+.sticker-10 { background-position: 33.333% 100%; }
+.sticker-11 { background-position: 66.666% 100%; }
+.sticker-12 { background-position: 100% 100%; }
 
 .page-shell {
   position: relative;
