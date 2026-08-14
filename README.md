@@ -4,6 +4,17 @@ This site uses Firebase Email/Password login. It does not show a sign-up button.
 You manually create accounts in Firebase, then allow those account UIDs in the
 Realtime Database rules.
 
+The website accepts either a real email address or a short username. Short
+usernames are converted to an email-shaped Firebase login. For example:
+
+- username `admin` signs in as `admin@things.local`
+- username `friend` signs in as `friend@things.local`
+
+Create the admin Firebase user as:
+
+- email: `admin@things.local`
+- password: the private password you chose for admin
+
 ### 1. Enable Email/Password login
 
 1. Open Firebase Console.
@@ -16,7 +27,7 @@ Realtime Database rules.
 
 1. In Firebase Console, go to Authentication > Users.
 2. Click Add user.
-3. Enter the email and password you want that person to use.
+3. Enter the email-shaped login and password you want that person to use.
 4. Copy that user's UID from the Users table.
 
 ### 3. Add the allowlist

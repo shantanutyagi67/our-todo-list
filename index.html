@@ -18,6 +18,33 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="cat-sticker-wall" aria-hidden="true">
+      <div class="cat-row cat-row--one">
+        <span>😺 meow</span><span>😼 certified tiny plan</span><span>🐾 pspsps</span><span>😽 mlem</span>
+        <span>😺 meow</span><span>😼 certified tiny plan</span><span>🐾 pspsps</span><span>😽 mlem</span>
+      </div>
+      <div class="cat-row cat-row--two">
+        <span>😹 hehe</span><span>🐱 soft chaos</span><span>😸 date list inspector</span><span>🐾 tap tap</span>
+        <span>😹 hehe</span><span>🐱 soft chaos</span><span>😸 date list inspector</span><span>🐾 tap tap</span>
+      </div>
+      <div class="cat-row cat-row--three">
+        <span>😻 biryani supervisor</span><span>🐈‍⬛ ritual assistant</span><span>😺 meow meow</span><span>🐾 approved</span>
+        <span>😻 biryani supervisor</span><span>🐈‍⬛ ritual assistant</span><span>😺 meow meow</span><span>🐾 approved</span>
+      </div>
+      <div class="cat-row cat-row--four">
+        <span>😽 tirameowsu</span><span>🐱 balcony watcher</span><span>😼 rain expert</span><span>🐾 tiny paws</span>
+        <span>😽 tirameowsu</span><span>🐱 balcony watcher</span><span>😼 rain expert</span><span>🐾 tiny paws</span>
+      </div>
+      <div class="cat-row cat-row--five">
+        <span>😹 suffer together</span><span>🐈 pillow patrol</span><span>😺 capybara chorus</span><span>🐾 done done</span>
+        <span>😹 suffer together</span><span>🐈 pillow patrol</span><span>😺 capybara chorus</span><span>🐾 done done</span>
+      </div>
+      <div class="cat-row cat-row--six">
+        <span>😸 counter-strike distraction</span><span>🐱 snack critic</span><span>😽 dark chocolate</span><span>🐾 secret list</span>
+        <span>😸 counter-strike distraction</span><span>🐱 snack critic</span><span>😽 dark chocolate</span><span>🐾 secret list</span>
+      </div>
+    </div>
+
     <main class="page-shell">
       <section class="todo-card" aria-labelledby="page-title">
         <div class="ornament ornament--left" aria-hidden="true">✦</div>
@@ -32,8 +59,15 @@
         <section id="login-panel" class="login-panel" aria-label="Sign in">
           <p class="login-copy">Sign in to open the shared list.</p>
           <form id="login-form" class="login-form">
-            <label class="sr-only" for="login-email">Email address</label>
-            <input id="login-email" name="email" type="email" placeholder="Email" autocomplete="email" required />
+            <label class="sr-only" for="login-identifier">Username or email</label>
+            <input
+              id="login-identifier"
+              name="identifier"
+              type="text"
+              placeholder="Username or email"
+              autocomplete="username"
+              required
+            />
             <label class="sr-only" for="login-password">Password</label>
             <input
               id="login-password"

@@ -27,6 +27,10 @@ const starterTasks = [
   "Distracting you while playing Counter-Strike 😈"
 ];
 
+const usernameAliases = {
+  admin: "admin@things.local"
+};
+
 const list = document.querySelector("#todo-list");
 const appPanel = document.querySelector("#app-panel");
 const loginPanel = document.querySelector("#login-panel");
@@ -60,6 +64,13 @@ function setLoginNote(message, isError = false) {
 
 function validConfig(config) {
   return config && config.apiKey && config.databaseURL && config.projectId;
+}
+
+function loginEmailFor(identifier) {
+  const normalized = identifier.trim().toLowerCase();
+  if (usernameAliases[normalized]) return usernameAliases[normalized];
+  if (normalized.includes("@")) return normalized;
+  return `${normalized}@things.local`;
 }
 
 function freshList() {
@@ -122,7 +133,7 @@ function showLogin(message = "") {
 function showApp(user) {
   loginPanel.hidden = true;
   appPanel.hidden = false;
-  accountEmail.textContent = user.email || "Signed in";
+  accountEmail.textContent = user.email === usernameAliases.admin ? "admin" : user.email || "Signed in";
 }
 
 async function toggleTask(id) {
@@ -164,7 +175,7 @@ form.addEventListener("submit", async (event) => {
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(loginForm);
-  const email = String(formData.get("email") || "").trim();
+  const email = loginEmailFor(String(formData.get("identifier") || ""));
   const password = String(formData.get("password") || "");
   const button = loginForm.querySelector("button");
   button.disabled = true;
@@ -204,6 +215,10 @@ async function start() {
         return;
       }
 
+      if (unsubscribeTodos) {
+        unsubscribeTodos();
+        unsubscribeTodos = undefined;
+      }
       showApp(user);
       setNote("Loading the shared list...");
       try {
