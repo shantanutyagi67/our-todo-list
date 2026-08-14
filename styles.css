@@ -128,7 +128,6 @@ h1 em { color: var(--pink); font-style: italic; }
 
 .ornament { position: absolute; z-index: 1; color: var(--pink); font-family: Fraunces, serif; font-size: 2.2rem; }
 .ornament--left { top: 30px; left: 34px; transform: rotate(-12deg); }
-.ornament--right { top: 34px; right: 35px; font-size: 2.6rem; }
 
 .progress-wrap { margin: 37px 0 18px; }
 .progress-labels { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); font-size: .74rem; font-weight: 800; letter-spacing: .02em; }
@@ -196,7 +195,6 @@ footer { margin-top: 25px; color: #aa929a; font-family: "DM Mono", monospace; fo
   .page-shell { padding: 16px 10px; }
   .todo-card { padding: 37px 23px 30px; border-radius: 22px; }
   .ornament--left { top: 19px; left: 20px; font-size: 1.7rem; }
-  .ornament--right { top: 21px; right: 20px; font-size: 2rem; }
   .todo-item { padding: 10px 5px; gap: 10px; }
   .task-text { font-size: .86rem; }
   .account-row { align-items: stretch; flex-direction: column; text-align: center; }

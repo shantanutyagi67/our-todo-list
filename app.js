@@ -330,7 +330,7 @@ async function start() {
         if (!firstRead.exists()) await set(todosRef, freshList());
         unsubscribeTodos = onValue(todosRef, (snapshot) => {
           render(snapshot.val());
-          setNote("Live and shared - changes appear for approved people.");
+          setNote("");
         }, () => {
           setNote("This account is signed in, but it is not approved for the list yet.", true);
         });
