@@ -6,21 +6,33 @@
   --paper: #fffaf7;
   --line: #ead8dc;
   --yellow: #f6d978;
-  --cat-gap: clamp(12px, 1.9vw, 24px);
+  --cat-gap: clamp(10px, 1.7vw, 22px);
 }
 
 * { box-sizing: border-box; }
 
+html { min-height: 100%; background: #f9e8ed; }
+
 body {
   overflow-x: hidden;
   min-width: 320px;
+  min-height: 100svh;
   margin: 0;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 14% 8%, #fff3b9 0 6%, transparent 24%),
-    radial-gradient(circle at 92% 88%, #f7cfdb 0 6%, transparent 25%),
-    #f9e8ed;
+  background: #f9e8ed;
   font-family: Manrope, system-ui, sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 12% 7%, #fff3b9 0 7%, transparent 28%),
+    radial-gradient(circle at 90% 88%, #f7cfdb 0 8%, transparent 30%),
+    linear-gradient(180deg, #f9e8ed 0%, #fff4e7 48%, #f9e8ed 100%),
+    #f9e8ed;
+  content: "";
 }
 
 .cat-sticker-wall {
@@ -38,8 +50,9 @@ body {
   width: max-content;
   gap: 0;
   white-space: nowrap;
-  opacity: .5;
+  opacity: .44;
   animation: cat-drift var(--duration, 32s) linear infinite;
+  will-change: transform;
 }
 
 .cat-set {
@@ -51,25 +64,27 @@ body {
 
 .cat-sticker {
   display: block;
-  width: clamp(58px, 7.5vw, 118px);
+  width: clamp(54px, 6.8vw, 112px);
   aspect-ratio: 1;
   border: 4px solid rgb(255 255 255 / 82%);
   border-radius: 15px;
   background: rgb(255 250 247 / 68%);
   object-fit: cover;
-  filter: drop-shadow(0 10px 16px rgb(118 59 75 / 14%));
+  filter: drop-shadow(0 8px 14px rgb(118 59 75 / 12%));
 }
 
-.cat-row--one { top: 5%; --duration: 72s; }
-.cat-row--two { top: 20%; --duration: 86s; animation-direction: reverse; }
-.cat-row--three { top: 36%; --duration: 78s; }
-.cat-row--four { top: 53%; --duration: 94s; animation-direction: reverse; }
-.cat-row--five { top: 70%; --duration: 74s; }
-.cat-row--six { top: 86%; --duration: 102s; animation-direction: reverse; }
+.cat-row--one { top: 4%; --duration: 72s; }
+.cat-row--two { top: 18%; --duration: 86s; animation-direction: reverse; }
+.cat-row--three { top: 32%; --duration: 78s; }
+.cat-row--four { top: 46%; --duration: 94s; animation-direction: reverse; }
+.cat-row--five { top: 60%; --duration: 74s; }
+.cat-row--six { top: 74%; --duration: 102s; animation-direction: reverse; }
+.cat-row--seven { top: 88%; --duration: 82s; }
+.cat-row--eight { top: 102%; --duration: 98s; animation-direction: reverse; }
 
 @keyframes cat-drift {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
 .page-shell {
@@ -192,12 +207,44 @@ footer { margin-top: 25px; color: #aa929a; font-family: "DM Mono", monospace; fo
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 
 @media (max-width: 500px) {
-  .page-shell { padding: 16px 10px; }
-  .todo-card { padding: 37px 23px 30px; border-radius: 22px; }
+  :root { --cat-gap: 8px; }
+  body::before {
+    background:
+      radial-gradient(circle at 12% 4%, #fff3b9 0 10%, transparent 34%),
+      radial-gradient(circle at 92% 96%, #f7cfdb 0 12%, transparent 36%),
+      linear-gradient(180deg, #f9e8ed 0%, #fff4e7 52%, #f9e8ed 100%);
+  }
+  .cat-row { opacity: .34; }
+  .cat-sticker { width: 54px; border-width: 3px; border-radius: 12px; filter: none; }
+  .cat-row--one { top: 2%; --duration: 84s; }
+  .cat-row--two { top: 14%; --duration: 96s; }
+  .cat-row--three { top: 26%; --duration: 90s; }
+  .cat-row--four { top: 38%; --duration: 104s; }
+  .cat-row--five { top: 50%; --duration: 88s; }
+  .cat-row--six { top: 62%; --duration: 110s; }
+  .cat-row--seven { top: 74%; --duration: 94s; }
+  .cat-row--eight { top: 86%; --duration: 116s; }
+  .page-shell { align-items: start; padding: 10px 8px 14px; }
+  .todo-card { padding: 27px 16px 20px; border-radius: 20px; }
+  .todo-card::before { inset: 7px; border-radius: 15px; }
   .ornament--left { top: 19px; left: 20px; font-size: 1.7rem; }
-  .todo-item { padding: 10px 5px; gap: 10px; }
-  .task-text { font-size: .86rem; }
-  .account-row { align-items: stretch; flex-direction: column; text-align: center; }
-  .account-row button { width: 100%; }
+  .eyebrow { margin-bottom: 5px; font-size: .58rem; }
+  h1 { font-size: 2.45rem; letter-spacing: -.04em; }
+  .subtitle { margin-top: 12px; font-size: .8rem; line-height: 1.35; }
+  .login-panel { margin-top: 22px; }
+  .progress-wrap { margin: 22px 0 10px; }
+  .progress-labels { font-size: .66rem; }
+  .todo-list { gap: 3px; }
+  .todo-item { padding: 6px 3px; gap: 8px; border-radius: 10px; }
+  .todo-item:hover { transform: none; }
+  .todo-item label { gap: 8px; }
+  .checkmark { flex-basis: 18px; width: 18px; height: 18px; font-size: .65rem; }
+  .task-text { font-size: .76rem; line-height: 1.24; }
+  .account-row { align-items: center; margin-top: 17px; }
+  .account-row button { padding: 8px 10px; }
+  .add-form { gap: 7px; margin-top: 14px; padding-top: 14px; }
+  .add-form input { padding: 10px 11px; font-size: .78rem; }
   .add-form button { padding: 0 13px; }
+  .connection-note { min-height: 14px; margin-top: 8px; }
+  footer { margin-top: 14px; font-size: .55rem; }
 }

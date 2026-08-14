@@ -129,16 +129,22 @@ let auth;
 let todosRef;
 let unsubscribeTodos;
 
-function createCatSet(rowIndex) {
+function stickerCountForViewport() {
+  if (window.matchMedia("(max-width: 500px)").matches) return 12;
+  if (window.matchMedia("(max-width: 820px)").matches) return 16;
+  return 24;
+}
+
+function createCatSet(rowIndex, count) {
   const set = document.createElement("div");
   set.className = "cat-set";
 
-  for (let index = 0; index < 32; index += 1) {
+  for (let index = 0; index < count; index += 1) {
     const image = document.createElement("img");
     image.className = "cat-sticker";
-    image.src = catImages[(rowIndex * 12 + index) % catImages.length];
+    image.src = catImages[(rowIndex * 9 + index) % catImages.length];
     image.alt = "";
-    image.loading = "eager";
+    image.loading = "lazy";
     image.decoding = "async";
     image.draggable = false;
     set.append(image);
@@ -148,8 +154,9 @@ function createCatSet(rowIndex) {
 }
 
 function buildCatBackground() {
+  const count = stickerCountForViewport();
   document.querySelectorAll(".cat-row").forEach((row, rowIndex) => {
-    const firstSet = createCatSet(rowIndex);
+    const firstSet = createCatSet(rowIndex, count);
     const secondSet = firstSet.cloneNode(true);
     row.replaceChildren(firstSet, secondSet);
   });
