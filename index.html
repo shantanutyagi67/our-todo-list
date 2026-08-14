@@ -29,34 +29,60 @@
           <p class="subtitle">Tiny adventures, strange plans, and everything in between.</p>
         </header>
 
-        <div class="progress-wrap" aria-label="List progress">
-          <div class="progress-labels">
-            <span id="progress-copy">Loading our list…</span>
-            <span id="progress-percent">0%</span>
-          </div>
-          <div class="progress-track" aria-hidden="true"><div id="progress-bar"></div></div>
-        </div>
-
-        <section aria-label="Our todo list">
-          <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
-          <p id="empty-state" class="empty-state" hidden>New chapter? Add the first plan below ✦</p>
+        <section id="login-panel" class="login-panel" aria-label="Sign in">
+          <p class="login-copy">Sign in to open the shared list.</p>
+          <form id="login-form" class="login-form">
+            <label class="sr-only" for="login-email">Email address</label>
+            <input id="login-email" name="email" type="email" placeholder="Email" autocomplete="email" required />
+            <label class="sr-only" for="login-password">Password</label>
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="submit">Sign in</button>
+          </form>
+          <p id="login-note" class="connection-note" role="status"></p>
         </section>
 
-        <form id="add-form" class="add-form">
-          <label class="sr-only" for="new-task">Add a new thing to do</label>
-          <input
-            id="new-task"
-            name="new-task"
-            type="text"
-            maxlength="180"
-            placeholder="Add another little plan…"
-            autocomplete="off"
-            required
-          />
-          <button type="submit" aria-label="Add this item">Add <span aria-hidden="true">+</span></button>
-        </form>
+        <section id="app-panel" hidden>
+          <div class="account-row">
+            <span id="account-email"></span>
+            <button id="sign-out" type="button">Sign out</button>
+          </div>
 
-        <p id="connection-note" class="connection-note" role="status"></p>
+          <div class="progress-wrap" aria-label="List progress">
+            <div class="progress-labels">
+              <span id="progress-copy">Loading our list…</span>
+              <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-track" aria-hidden="true"><div id="progress-bar"></div></div>
+          </div>
+
+          <section aria-label="Our todo list">
+            <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+            <p id="empty-state" class="empty-state" hidden>New chapter? Add the first plan below ✦</p>
+          </section>
+
+          <form id="add-form" class="add-form">
+            <label class="sr-only" for="new-task">Add a new thing to do</label>
+            <input
+              id="new-task"
+              name="new-task"
+              type="text"
+              maxlength="180"
+              placeholder="Add another little plan…"
+              autocomplete="off"
+              required
+            />
+            <button type="submit" aria-label="Add this item">Add <span aria-hidden="true">+</span></button>
+          </form>
+
+          <p id="connection-note" class="connection-note" role="status"></p>
+        </section>
         <footer>made for two people who are very good at making plans ♡</footer>
       </section>
     </main>

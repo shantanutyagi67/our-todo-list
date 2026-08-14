@@ -48,7 +48,7 @@ body {
   pointer-events: none;
 }
 
-.hero, .progress-wrap, .todo-list, .empty-state, .add-form, .connection-note, footer { position: relative; }
+.hero, .login-panel, #app-panel, .progress-wrap, .todo-list, .empty-state, .add-form, .connection-note, footer { position: relative; }
 
 .hero { text-align: center; }
 .eyebrow {
@@ -82,6 +82,41 @@ h1 em { color: var(--pink); font-style: italic; }
 .progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #f2e4e5; }
 #progress-bar { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), #f29db4); transition: width .35s ease; }
 
+.login-panel { margin: 34px auto 8px; max-width: 390px; }
+.login-copy { margin: 0 0 14px; color: var(--muted); font-size: .86rem; font-weight: 700; text-align: center; }
+.login-form { display: grid; gap: 10px; }
+.login-form input, .add-form input {
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid #e8d6da;
+  border-radius: 12px;
+  outline: none;
+  background: #fffdfc;
+  color: var(--ink);
+  font: inherit;
+  font-size: .9rem;
+}
+.login-form input:focus, .add-form input:focus { border-color: #e790a9; box-shadow: 0 0 0 4px #fce5eb; }
+.login-form button, .add-form button, .account-row button {
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  background: var(--pink);
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 800;
+  box-shadow: 0 4px 0 var(--pink-deep);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.login-form button { min-height: 46px; }
+.login-form button:hover, .add-form button:hover, .account-row button:hover { background: #dc5f83; }
+.login-form button:active, .add-form button:active, .account-row button:active { box-shadow: 0 1px 0 var(--pink-deep); transform: translateY(3px); }
+.login-form button:disabled, .add-form button:disabled { cursor: wait; opacity: .65; }
+.account-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 28px 0 0; color: var(--muted); font-size: .74rem; font-weight: 800; }
+.account-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-row button { flex: 0 0 auto; padding: 9px 12px; font-size: .72rem; box-shadow: 0 3px 0 var(--pink-deep); }
+
 .todo-list { display: grid; gap: 9px; padding: 0; margin: 0; list-style: none; }
 .todo-item { display: flex; align-items: center; gap: 13px; padding: 12px 13px; border-radius: 13px; transition: background .2s ease, transform .2s ease; }
 .todo-item:hover { background: #fff0f3; transform: translateX(2px); }
@@ -95,12 +130,8 @@ h1 em { color: var(--pink); font-style: italic; }
 
 .empty-state { padding: 24px 0; margin: 0; color: var(--muted); text-align: center; }
 .add-form { display: flex; gap: 9px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
-.add-form input { min-width: 0; flex: 1; padding: 13px 15px; border: 1px solid #e8d6da; border-radius: 12px; outline: none; background: #fffdfc; color: var(--ink); font: inherit; font-size: .9rem; }
-.add-form input:focus { border-color: #e790a9; box-shadow: 0 0 0 4px #fce5eb; }
-.add-form button { border: 0; border-radius: 12px; padding: 0 17px; cursor: pointer; color: white; background: var(--pink); font: inherit; font-size: .84rem; font-weight: 800; box-shadow: 0 4px 0 var(--pink-deep); transition: transform .15s ease, box-shadow .15s ease; }
-.add-form button:hover { background: #dc5f83; }
-.add-form button:active { box-shadow: 0 1px 0 var(--pink-deep); transform: translateY(3px); }
-.add-form button:disabled { cursor: wait; opacity: .65; }
+.add-form input { flex: 1; }
+.add-form button { padding: 0 17px; }
 .add-form button span { font-size: 1.2rem; vertical-align: -1px; }
 
 .connection-note { min-height: 20px; margin: 14px 0 0; color: var(--muted); font-size: .72rem; text-align: center; }
@@ -115,5 +146,7 @@ footer { margin-top: 25px; color: #aa929a; font-family: "DM Mono", monospace; fo
   .ornament--right { top: 21px; right: 20px; font-size: 2rem; }
   .todo-item { padding: 10px 5px; gap: 10px; }
   .task-text { font-size: .86rem; }
+  .account-row { align-items: stretch; flex-direction: column; text-align: center; }
+  .account-row button { width: 100%; }
   .add-form button { padding: 0 13px; }
 }
