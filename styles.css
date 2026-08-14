@@ -6,6 +6,7 @@
   --paper: #fffaf7;
   --line: #ead8dc;
   --yellow: #f6d978;
+  --cat-gap: clamp(12px, 1.9vw, 24px);
 }
 
 * { box-sizing: border-box; }
@@ -35,25 +36,25 @@ body {
   left: 0;
   display: flex;
   width: max-content;
-  gap: clamp(18px, 4vw, 52px);
+  gap: 0;
   white-space: nowrap;
-  opacity: .52;
+  opacity: .5;
   animation: cat-drift var(--duration, 32s) linear infinite;
 }
 
 .cat-set {
   display: flex;
   flex: 0 0 auto;
-  gap: clamp(18px, 4vw, 52px);
-  padding-right: clamp(18px, 4vw, 52px);
+  gap: var(--cat-gap);
+  padding-right: var(--cat-gap);
 }
 
 .cat-sticker {
   display: block;
-  width: clamp(74px, 11vw, 148px);
+  width: clamp(58px, 7.5vw, 118px);
   aspect-ratio: 1;
-  border: 5px solid rgb(255 255 255 / 82%);
-  border-radius: 18px;
+  border: 4px solid rgb(255 255 255 / 82%);
+  border-radius: 15px;
   background: rgb(255 250 247 / 68%);
   object-fit: cover;
   filter: drop-shadow(0 10px 16px rgb(118 59 75 / 14%));

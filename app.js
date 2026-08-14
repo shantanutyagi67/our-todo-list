@@ -33,6 +33,81 @@ const usernameAliases = {
   admin: "admin@things.local"
 };
 
+const catImages = [
+  "assets/cats/cat-01.jpeg",
+  "assets/cats/cat-02.jpg",
+  "assets/cats/cat-03.png",
+  "assets/cats/cat-04.jpg",
+  "assets/cats/cat-05.png",
+  "assets/cats/cat-06.jpg",
+  "assets/cats/cat-07.jpg",
+  "assets/cats/cat-08.jpg",
+  "assets/cats/cat-09.jpg",
+  "assets/cats/cat-10.jpg",
+  "assets/cats/cat-11.jpg",
+  "assets/cats/cat-12.jpg",
+  "assets/cats/cat-13.jpg",
+  "assets/cats/cat-14.jpg",
+  "assets/cats/cat-15.jpg",
+  "assets/cats/cat-16.jpg",
+  "assets/cats/cat-17.jpg",
+  "assets/cats/cat-18.jpg",
+  "assets/cats/cat-19.jpg",
+  "assets/cats/cat-20.jpg",
+  "assets/cats/cat-21.jpg",
+  "assets/cats/cat-22.jpg",
+  "assets/cats/cat-23.jpg",
+  "assets/cats/cat-24.jpg",
+  "assets/cats/cat-25.jpg",
+  "assets/cats/cat-26.jpg",
+  "assets/cats/cat-27.jpg",
+  "assets/cats/cat-28.jpg",
+  "assets/cats/cat-29.jpg",
+  "assets/cats/cat-30.jpg",
+  "assets/cats/cat-31.jpg",
+  "assets/cats/cat-32.jpg",
+  "assets/cats/cat-33.jpg",
+  "assets/cats/cat-34.jpg",
+  "assets/cats/cat-35.jpg",
+  "assets/cats/cat-36.jpg",
+  "assets/cats/cat-37.jpg",
+  "assets/cats/cat-38.jpg",
+  "assets/cats/cat-39.jpg",
+  "assets/cats/cat-40.jpg",
+  "assets/cats/cat-41.jpg",
+  "assets/cats/cat-42.jpg",
+  "assets/cats/cat-43.jpg",
+  "assets/cats/cat-44.jpg",
+  "assets/cats/cat-45.jpg",
+  "assets/cats/cat-46.jpg",
+  "assets/cats/cat-47.jpg",
+  "assets/cats/cat-48.jpg",
+  "assets/cats/cat-49.jpg",
+  "assets/cats/cat-50.jpg",
+  "assets/cats/cat-51.jpg",
+  "assets/cats/cat-52.jpg",
+  "assets/cats/cat-53.jpg",
+  "assets/cats/cat-54.jpg",
+  "assets/cats/cat-55.jpg",
+  "assets/cats/cat-56.jpg",
+  "assets/cats/cat-57.jpg",
+  "assets/cats/cat-58.jpg",
+  "assets/cats/cat-59.jpg",
+  "assets/cats/cat-60.jpg",
+  "assets/cats/cat-61.jpg",
+  "assets/cats/cat-62.jpg",
+  "assets/cats/cat-63.jpg",
+  "assets/cats/cat-64.jpg",
+  "assets/cats/cat-65.jpg",
+  "assets/cats/cat-66.jpg",
+  "assets/cats/cat-67.jpg",
+  "assets/cats/cat-68.jpg",
+  "assets/cats/cat-69.jpg",
+  "assets/cats/cat-70.jpg",
+  "assets/cats/cat-71.jpg",
+  "assets/cats/cat-72.jpg"
+];
+
 const list = document.querySelector("#todo-list");
 const appPanel = document.querySelector("#app-panel");
 const loginPanel = document.querySelector("#login-panel");
@@ -53,6 +128,32 @@ let currentState = { tasks: [] };
 let auth;
 let todosRef;
 let unsubscribeTodos;
+
+function createCatSet(rowIndex) {
+  const set = document.createElement("div");
+  set.className = "cat-set";
+
+  for (let index = 0; index < 32; index += 1) {
+    const image = document.createElement("img");
+    image.className = "cat-sticker";
+    image.src = catImages[(rowIndex * 12 + index) % catImages.length];
+    image.alt = "";
+    image.loading = "eager";
+    image.decoding = "async";
+    image.draggable = false;
+    set.append(image);
+  }
+
+  return set;
+}
+
+function buildCatBackground() {
+  document.querySelectorAll(".cat-row").forEach((row, rowIndex) => {
+    const firstSet = createCatSet(rowIndex);
+    const secondSet = firstSet.cloneNode(true);
+    row.replaceChildren(firstSet, secondSet);
+  });
+}
 
 function setNote(message, isError = false) {
   note.textContent = message;
@@ -246,4 +347,5 @@ async function start() {
   }
 }
 
+buildCatBackground();
 start();
