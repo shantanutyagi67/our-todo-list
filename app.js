@@ -53,16 +53,10 @@ const bikeRideTasks = [
 }));
 
 const rideSections = [
-  { label: "0.5 hr", min: 0, max: 0.75 },
-  { label: "1 hr", min: 0.75, max: 1.25 },
-  { label: "1.5 hrs", min: 1.25, max: 1.75 },
-  { label: "2 hrs", min: 1.75, max: 2.25 },
-  { label: "2.5 hrs", min: 2.25, max: 2.75 },
-  { label: "3 hrs", min: 2.75, max: 3.5 },
-  { label: "4 hrs", min: 3.5, max: 4.5 },
-  { label: "5 hrs", min: 4.5, max: 5.5 },
-  { label: "6 hrs", min: 5.5, max: 6.5 },
-  { label: "7+ hrs", min: 6.5, max: Infinity }
+  { label: "0–2 hrs", min: 0, max: 2, includeMin: true },
+  { label: "2–4 hrs", min: 2, max: 4 },
+  { label: "4–8 hrs", min: 4, max: 8 },
+  { label: "8+ hrs", min: 8, max: Infinity }
 ];
 
 const listConfigs = {
@@ -367,7 +361,10 @@ function normalizeState(state) {
 
 function rideSectionFor(task) {
   const duration = Number(task.durationHours);
-  return rideSections.find((section) => duration >= section.min && duration < section.max) || rideSections.at(-1);
+  return rideSections.find((section) => {
+    const isAboveLowerBound = section.includeMin ? duration >= section.min : duration > section.min;
+    return isAboveLowerBound && duration <= section.max;
+  }) || rideSections.at(-1);
 }
 
 function renderTask(task) {
@@ -411,7 +408,11 @@ function render(state) {
 
     for (const section of rideSections) {
       const sectionTasks = groupedTasks.get(section.label)
-        .sort((left, right) => Number(left.durationHours) - Number(right.durationHours));
+        .sort((left, right) => {
+          const durationDifference = Number(left.durationHours) - Number(right.durationHours);
+          if (durationDifference !== 0) return durationDifference;
+          return String(left.location || left.text).localeCompare(String(right.location || right.text));
+        });
       if (!sectionTasks.length) continue;
 
       const header = document.createElement("li");
