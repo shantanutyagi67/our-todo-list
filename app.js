@@ -212,6 +212,34 @@ let todosRef;
 let unsubscribeTodos;
 let activeList = getActiveList();
 
+function deviceLoginKey(user) {
+  return `things-we-shall-do:list-login:${activeList.dbKey}:${user.uid}`;
+}
+
+function hasDeviceLoginForList(user) {
+  try {
+    return window.localStorage.getItem(deviceLoginKey(user)) === "true";
+  } catch (error) {
+    return false;
+  }
+}
+
+function rememberDeviceLoginForList(user) {
+  try {
+    window.localStorage.setItem(deviceLoginKey(user), "true");
+  } catch (error) {
+    // If storage is unavailable, Firebase auth still works for this browser session.
+  }
+}
+
+function forgetDeviceLoginForList(user) {
+  try {
+    window.localStorage.removeItem(deviceLoginKey(user));
+  } catch (error) {
+    // Nothing to clean up if storage is unavailable.
+  }
+}
+
 function getActiveList() {
   const routeParts = window.location.pathname
     .split("/")
@@ -513,7 +541,8 @@ loginForm.addEventListener("submit", async (event) => {
   button.disabled = true;
   setLoginNote("Checking the key to the list...");
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    rememberDeviceLoginForList(credential.user);
     loginForm.reset();
   } catch (error) {
     setLoginNote("That email or password did not work.", true);
@@ -523,6 +552,7 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 signOutButton.addEventListener("click", async () => {
+  if (auth.currentUser) forgetDeviceLoginForList(auth.currentUser);
   await signOut(auth);
 });
 
@@ -552,6 +582,12 @@ async function start() {
         unsubscribeTodos();
         unsubscribeTodos = undefined;
       }
+
+      if (!hasDeviceLoginForList(user)) {
+        showLogin("Please sign in once on this device for this list.");
+        return;
+      }
+
       showApp(user);
       setNote("Loading the shared list...");
       try {
