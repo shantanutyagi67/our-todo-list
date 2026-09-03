@@ -12,6 +12,7 @@
 * { box-sizing: border-box; }
 
 html { min-height: 100%; background: #f9e8ed; }
+html:has(body.theme-bike-rides) { background: #e7fff8; }
 
 body {
   overflow-x: hidden;
@@ -31,6 +32,7 @@ body.theme-bike-rides {
   --paper: #f8fffb;
   --line: #cce8df;
   --yellow: #f4d06f;
+  background: #e7fff8;
 }
 
 body::before {
