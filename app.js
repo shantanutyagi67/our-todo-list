@@ -544,6 +544,7 @@ loginForm.addEventListener("submit", async (event) => {
     const credential = await signInWithEmailAndPassword(auth, email, password);
     rememberDeviceLoginForList(credential.user);
     loginForm.reset();
+    await openListForUser(credential.user);
   } catch (error) {
     setLoginNote("That email or password did not work.", true);
   } finally {
@@ -555,6 +556,28 @@ signOutButton.addEventListener("click", async () => {
   if (auth.currentUser) forgetDeviceLoginForList(auth.currentUser);
   await signOut(auth);
 });
+
+async function openListForUser(user) {
+  if (unsubscribeTodos) {
+    unsubscribeTodos();
+    unsubscribeTodos = undefined;
+  }
+
+  showApp(user);
+  setNote("Loading the shared list...");
+  try {
+    const firstRead = await get(todosRef);
+    if (!firstRead.exists()) await set(todosRef, freshList());
+    unsubscribeTodos = onValue(todosRef, (snapshot) => {
+      render(snapshot.val());
+      setNote("");
+    }, () => {
+      setNote("This account is signed in, but it is not approved for the list yet.", true);
+    });
+  } catch (error) {
+    setNote("This account is signed in, but it is not approved for the list yet.", true);
+  }
+}
 
 async function start() {
   const config = window.FIREBASE_CONFIG;
@@ -588,20 +611,7 @@ async function start() {
         return;
       }
 
-      showApp(user);
-      setNote("Loading the shared list...");
-      try {
-        const firstRead = await get(todosRef);
-        if (!firstRead.exists()) await set(todosRef, freshList());
-        unsubscribeTodos = onValue(todosRef, (snapshot) => {
-          render(snapshot.val());
-          setNote("");
-        }, () => {
-          setNote("This account is signed in, but it is not approved for the list yet.", true);
-        });
-      } catch (error) {
-        setNote("This account is signed in, but it is not approved for the list yet.", true);
-      }
+      await openListForUser(user);
     });
   } catch (error) {
     console.error(error);
