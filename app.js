@@ -211,6 +211,7 @@ let auth;
 let todosRef;
 let unsubscribeTodos;
 let activeList = getActiveList();
+let isManualLoginInProgress = false;
 
 function deviceLoginKey(user) {
   return `things-we-shall-do:list-login:${activeList.dbKey}:${user.uid}`;
@@ -539,6 +540,7 @@ loginForm.addEventListener("submit", async (event) => {
   const password = String(formData.get("password") || "");
   const button = loginForm.querySelector("button");
   button.disabled = true;
+  isManualLoginInProgress = true;
   setLoginNote("Checking the key to the list...");
   try {
     const credential = await signInWithEmailAndPassword(auth, email, password);
@@ -548,6 +550,7 @@ loginForm.addEventListener("submit", async (event) => {
   } catch (error) {
     setLoginNote("That email or password did not work.", true);
   } finally {
+    isManualLoginInProgress = false;
     button.disabled = false;
   }
 });
@@ -606,11 +609,12 @@ async function start() {
         unsubscribeTodos = undefined;
       }
 
-      if (!hasDeviceLoginForList(user)) {
+      if (!hasDeviceLoginForList(user) && !isManualLoginInProgress) {
         showLogin("Please sign in once on this device for this list.");
         return;
       }
 
+      rememberDeviceLoginForList(user);
       await openListForUser(user);
     });
   } catch (error) {
