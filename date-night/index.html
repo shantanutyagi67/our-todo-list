@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f9e8ed" />
+    <meta
+      name="description"
+      content="A shared little list of adventures, food, rain, and wonderfully odd plans."
+    />
+    <title>Things We Shall Do ✦</title>
+    <base href="../" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="cat-sticker-wall" aria-hidden="true">
+      <div class="cat-row cat-row--one"></div>
+      <div class="cat-row cat-row--two"></div>
+      <div class="cat-row cat-row--three"></div>
+      <div class="cat-row cat-row--four"></div>
+      <div class="cat-row cat-row--five"></div>
+      <div class="cat-row cat-row--six"></div>
+      <div class="cat-row cat-row--seven"></div>
+      <div class="cat-row cat-row--eight"></div>
+    </div>
+
+    <main class="page-shell">
+      <section class="todo-card" aria-labelledby="page-title">
+        <div class="ornament ornament--left" aria-hidden="true">✦</div>
+
+        <header class="hero">
+          <p class="eyebrow">the very important list</p>
+          <h1 id="page-title">Things we<br /><em>shall do</em></h1>
+          <p class="subtitle">Tiny adventures, strange plans, and everything in between.</p>
+        </header>
+
+        <section id="login-panel" class="login-panel" aria-label="Sign in">
+          <p class="login-copy">Sign in to open the shared list.</p>
+          <form id="login-form" class="login-form">
+            <label class="sr-only" for="login-identifier">Username or email</label>
+            <input
+              id="login-identifier"
+              name="identifier"
+              type="text"
+              placeholder="Username or email"
+              autocomplete="username"
+              required
+            />
+            <label class="sr-only" for="login-password">Password</label>
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="submit">Sign in</button>
+          </form>
+          <p id="login-note" class="connection-note" role="status"></p>
+        </section>
+
+        <section id="app-panel" hidden>
+          <div class="account-row">
+            <span id="account-email"></span>
+            <button id="sign-out" type="button">Sign out</button>
+          </div>
+
+          <div class="progress-wrap" aria-label="List progress">
+            <div class="progress-labels">
+              <span id="progress-copy">Loading our list…</span>
+              <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-track" aria-hidden="true"><div id="progress-bar"></div></div>
+          </div>
+
+          <section aria-label="Our todo list">
+            <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+            <p id="empty-state" class="empty-state" hidden>New chapter? Add the first plan below ✦</p>
+          </section>
+
+          <form id="add-form" class="add-form">
+            <label class="sr-only" for="new-task">Add a new thing to do</label>
+            <input
+              id="new-task"
+              name="new-task"
+              type="text"
+              maxlength="180"
+              placeholder="Add another little plan…"
+              autocomplete="off"
+              required
+            />
+            <button type="submit" aria-label="Add this item">Add <span aria-hidden="true">+</span></button>
+          </form>
+
+          <p id="connection-note" class="connection-note" role="status"></p>
+        </section>
+        <footer>made for two people who are very good at making lists</footer>
+      </section>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
