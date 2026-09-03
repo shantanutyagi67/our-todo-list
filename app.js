@@ -81,7 +81,7 @@ const listConfigs = {
     dbKey: "bike-rides",
     documentTitle: "Ahmedabad Bike Rides ✦",
     description: "A shared bike ride list grouped by travel time from Ahmedabad.",
-    eyebrow: "ahmedabad bike ride list",
+    eyebrow: "vroom vroom",
     titleHtml: "Bike rides<br /><em>from Ahmedabad</em>",
     subtitle: "Sorted by how far the road wants to pull you.",
     loginCopy: "Sign in to open the bike ride list.",
