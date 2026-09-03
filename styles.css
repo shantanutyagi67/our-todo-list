@@ -271,6 +271,32 @@ body.theme-bike-rides .todo-item.is-done .task-text { color: #8aa1a1; text-decor
   font-weight: 800;
 }
 
+@media (min-width: 860px) {
+  .todo-card {
+    width: min(100%, 1040px);
+  }
+
+  .todo-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 9px;
+  }
+
+  .todo-section-heading {
+    grid-column: 1 / -1;
+  }
+
+  .empty-state,
+  .progress-wrap,
+  .add-form,
+  .connection-note,
+  footer {
+    max-width: 720px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
 .empty-state { padding: 24px 0; margin: 0; color: var(--muted); text-align: center; }
 .add-form { display: flex; gap: 9px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
 .add-form input { flex: 1; }
