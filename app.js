@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getDatabase, get, onValue, ref, runTransaction, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-const starterTasks = [
+const dateTasks = [
   "Water park walk in the dust",
   "Indroda fort",
   "E-bike and bike lessons",
@@ -27,7 +27,56 @@ const starterTasks = [
   "Sing capybara song and be awkward together",
   "Pillow monster pillow fight (but be careful of the nails)",
   "Distracting you while playing Counter-Strike 😈"
-];
+].map((text, index) => ({ text, done: index === 9 }));
+
+const bikeRideTasks = [
+  "1 hr — Thol Sanctuary",
+  "1.5 hrs — Roda Temples, Himmatnagar",
+  "1.5 hrs — Zanzari Waterfall",
+  "2 hrs — Sun Temple",
+  "2 hrs — Idar Fort, Himmatnagar",
+  "2 hrs — Nalsarovar Sanctuary",
+  "2.5 hrs — Rani ki Vav",
+  "2.5 hrs — Polo Forest",
+  "2.5 hrs — Dasada",
+  "2.5 hrs — Taranga Hill",
+  "3 hrs — Ambaji",
+  "4 hrs — Udaipur",
+  "5 hrs — Statue of Unity",
+  "6 hrs — Kumbhalgarh",
+  "7 hrs — Road to Heaven"
+].map((text) => ({ text, done: false }));
+
+const listConfigs = {
+  dates: {
+    routePart: "dates",
+    dbKey: "date-night",
+    documentTitle: "Date Things We Shall Do ✦",
+    description: "A shared little list of adventures, food, rain, and wonderfully odd plans.",
+    eyebrow: "the very important date list",
+    titleHtml: "Things we<br /><em>shall do</em>",
+    subtitle: "Tiny adventures, strange plans, and everything in between.",
+    loginCopy: "Sign in to open the date list.",
+    emptyState: "New chapter? Add the first plan below ✦",
+    addPlaceholder: "Add another little plan…",
+    progressNoun: "little plans",
+    starterTasks: dateTasks
+  },
+  bikeRides: {
+    routePart: "bike-rides",
+    dbKey: "bike-rides",
+    documentTitle: "Ahmedabad Bike Rides ✦",
+    description: "A shared bike ride list grouped by travel time from Ahmedabad.",
+    eyebrow: "ahmedabad bike ride list",
+    titleHtml: "Bike rides<br /><em>from Ahmedabad</em>",
+    subtitle: "Sorted by how far the road wants to pull you.",
+    loginCopy: "Sign in to open the bike ride list.",
+    emptyState: "Add the first ride and summon the helmets ✦",
+    addPlaceholder: "Add another ride…",
+    progressNoun: "rides",
+    starterTasks: bikeRideTasks
+  }
+};
 
 const usernameAliases = {
   admin: "admin@things.local"
@@ -123,11 +172,40 @@ const progressCopy = document.querySelector("#progress-copy");
 const progressPercent = document.querySelector("#progress-percent");
 const progressBar = document.querySelector("#progress-bar");
 const submitButton = form.querySelector("button");
+const pageTitle = document.querySelector("#page-title");
+const pageDescription = document.querySelector('meta[name="description"]');
+const eyebrow = document.querySelector(".eyebrow");
+const subtitle = document.querySelector(".subtitle");
+const loginCopy = document.querySelector(".login-copy");
+const footer = document.querySelector("footer");
 
 let currentState = { tasks: [] };
 let auth;
 let todosRef;
 let unsubscribeTodos;
+let activeList = getActiveList();
+
+function getActiveList() {
+  const routeParts = window.location.pathname
+    .split("/")
+    .filter(Boolean)
+    .filter((part) => part !== "index.html");
+
+  if (routeParts.includes(listConfigs.bikeRides.routePart)) return listConfigs.bikeRides;
+  return listConfigs.dates;
+}
+
+function applyListCopy() {
+  document.title = activeList.documentTitle;
+  if (pageDescription) pageDescription.setAttribute("content", activeList.description);
+  eyebrow.textContent = activeList.eyebrow;
+  pageTitle.innerHTML = activeList.titleHtml;
+  subtitle.textContent = activeList.subtitle;
+  loginCopy.textContent = activeList.loginCopy;
+  emptyState.textContent = activeList.emptyState;
+  input.placeholder = activeList.addPlaceholder;
+  footer.textContent = "made for two people who are very good at making lists";
+}
 
 function stickerCountForViewport() {
   if (window.matchMedia("(max-width: 500px)").matches) return 12;
@@ -185,10 +263,10 @@ function loginEmailFor(identifier) {
 
 function freshList() {
   return {
-    tasks: starterTasks.map((text, index) => ({
-      id: `starter-${index + 1}`,
-      text,
-      done: index === 9,
+    tasks: activeList.starterTasks.map((task, index) => ({
+      id: `${activeList.dbKey}-${index + 1}`,
+      text: task.text,
+      done: Boolean(task.done),
       createdAt: index
     })),
     updatedAt: Date.now()
@@ -246,7 +324,7 @@ function render(state) {
 
   const complete = tasks.filter((task) => task.done).length;
   const percent = tasks.length ? Math.round((complete / tasks.length) * 100) : 0;
-  progressCopy.textContent = `${complete} of ${tasks.length} little plans done`;
+  progressCopy.textContent = `${complete} of ${tasks.length} ${activeList.progressNoun} done`;
   progressPercent.textContent = `${percent}%`;
   progressBar.style.width = `${percent}%`;
 }
@@ -344,7 +422,7 @@ async function start() {
     const app = initializeApp(config);
     auth = getAuth(app);
     await setPersistence(auth, browserLocalPersistence);
-    todosRef = ref(getDatabase(app), "sharedTodos/date-night");
+    todosRef = ref(getDatabase(app), `sharedTodos/${activeList.dbKey}`);
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -381,4 +459,5 @@ async function start() {
 }
 
 buildCatBackground();
+applyListCopy();
 start();
