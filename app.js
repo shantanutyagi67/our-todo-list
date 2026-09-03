@@ -195,8 +195,30 @@ function freshList() {
   };
 }
 
+function normalizeTasks(tasks) {
+  if (Array.isArray(tasks)) {
+    return tasks.filter((task) => task && typeof task.text === "string");
+  }
+
+  if (tasks && typeof tasks === "object") {
+    return Object.entries(tasks)
+      .sort(([left], [right]) => Number(left) - Number(right))
+      .map(([, task]) => task)
+      .filter((task) => task && typeof task.text === "string");
+  }
+
+  return [];
+}
+
+function normalizeState(state) {
+  return {
+    ...(state && typeof state === "object" ? state : {}),
+    tasks: normalizeTasks(state?.tasks)
+  };
+}
+
 function render(state) {
-  currentState = state && Array.isArray(state.tasks) ? state : { tasks: [] };
+  currentState = normalizeState(state);
   const tasks = currentState.tasks;
   list.replaceChildren();
   emptyState.hidden = tasks.length !== 0;
@@ -249,10 +271,11 @@ function showApp(user) {
 async function toggleTask(id) {
   try {
     await runTransaction(todosRef, (state) => {
-      if (!state || !Array.isArray(state.tasks)) return state;
+      const normalizedState = normalizeState(state);
+      if (!normalizedState.tasks.length) return state;
       return {
-        ...state,
-        tasks: state.tasks.map((task) => task.id === id ? { ...task, done: !task.done } : task),
+        ...normalizedState,
+        tasks: normalizedState.tasks.map((task) => task.id === id ? { ...task, done: !task.done } : task),
         updatedAt: Date.now()
       };
     });
@@ -268,11 +291,14 @@ form.addEventListener("submit", async (event) => {
   submitButton.disabled = true;
   try {
     const newTask = { id: crypto.randomUUID(), text, done: false, createdAt: Date.now() };
-    await runTransaction(todosRef, (state) => ({
-      ...(state && Array.isArray(state.tasks) ? state : { tasks: [] }),
-      tasks: [...(state?.tasks || []), newTask],
-      updatedAt: Date.now()
-    }));
+    await runTransaction(todosRef, (state) => {
+      const normalizedState = normalizeState(state);
+      return {
+        ...normalizedState,
+        tasks: [...normalizedState.tasks, newTask],
+        updatedAt: Date.now()
+      };
+    });
     input.value = "";
     input.focus();
   } catch (error) {
