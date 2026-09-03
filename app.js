@@ -30,22 +30,40 @@ const dateTasks = [
 ].map((text, index) => ({ text, done: index === 9 }));
 
 const bikeRideTasks = [
-  "1 hr — Thol Sanctuary",
-  "1.5 hrs — Roda Temples, Himmatnagar",
-  "1.5 hrs — Zanzari Waterfall",
-  "2 hrs — Sun Temple",
-  "2 hrs — Idar Fort, Himmatnagar",
-  "2 hrs — Nalsarovar Sanctuary",
-  "2.5 hrs — Rani ki Vav",
-  "2.5 hrs — Polo Forest",
-  "2.5 hrs — Dasada",
-  "2.5 hrs — Taranga Hill",
-  "3 hrs — Ambaji",
-  "4 hrs — Udaipur",
-  "5 hrs — Statue of Unity",
-  "6 hrs — Kumbhalgarh",
-  "7 hrs — Road to Heaven"
-].map((text) => ({ text, done: false }));
+  ["Thol Sanctuary", 1],
+  ["Roda Temples, Himmatnagar", 1.5],
+  ["Zanzari Waterfall", 1.5],
+  ["Sun Temple", 2],
+  ["Idar Fort, Himmatnagar", 2],
+  ["Nalsarovar Sanctuary", 2],
+  ["Rani ki Vav", 2.5],
+  ["Polo Forest", 2.5],
+  ["Dasada", 2.5],
+  ["Taranga Hill", 2.5],
+  ["Ambaji", 3],
+  ["Udaipur", 4],
+  ["Statue of Unity", 5],
+  ["Kumbhalgarh", 6],
+  ["Road to Heaven", 7]
+].map(([location, durationHours]) => ({
+  location,
+  durationHours,
+  text: `${durationHours} ${durationHours === 1 ? "hr" : "hrs"} — ${location}`,
+  done: false
+}));
+
+const rideSections = [
+  { label: "0.5 hr", min: 0, max: 0.75 },
+  { label: "1 hr", min: 0.75, max: 1.25 },
+  { label: "1.5 hrs", min: 1.25, max: 1.75 },
+  { label: "2 hrs", min: 1.75, max: 2.25 },
+  { label: "2.5 hrs", min: 2.25, max: 2.75 },
+  { label: "3 hrs", min: 2.75, max: 3.5 },
+  { label: "4 hrs", min: 3.5, max: 4.5 },
+  { label: "5 hrs", min: 4.5, max: 5.5 },
+  { label: "6 hrs", min: 5.5, max: 6.5 },
+  { label: "7+ hrs", min: 6.5, max: Infinity }
+];
 
 const listConfigs = {
   dates: {
@@ -60,7 +78,9 @@ const listConfigs = {
     emptyState: "New chapter? Add the first plan below ✦",
     addPlaceholder: "Add another little plan…",
     progressNoun: "little plans",
-    starterTasks: dateTasks
+    starterTasks: dateTasks,
+    themeClass: "theme-dates",
+    isRideList: false
   },
   bikeRides: {
     routePart: "bike-rides",
@@ -72,9 +92,11 @@ const listConfigs = {
     subtitle: "Sorted by how far the road wants to pull you.",
     loginCopy: "Sign in to open the bike ride list.",
     emptyState: "Add the first ride and summon the helmets ✦",
-    addPlaceholder: "Add another ride…",
+    addPlaceholder: "Location name",
     progressNoun: "rides",
-    starterTasks: bikeRideTasks
+    starterTasks: bikeRideTasks,
+    themeClass: "theme-bike-rides",
+    isRideList: true
   }
 };
 
@@ -166,6 +188,7 @@ const accountEmail = document.querySelector("#account-email");
 const signOutButton = document.querySelector("#sign-out");
 const form = document.querySelector("#add-form");
 const input = document.querySelector("#new-task");
+const addLabel = document.querySelector('label[for="new-task"]');
 const note = document.querySelector("#connection-note");
 const emptyState = document.querySelector("#empty-state");
 const progressCopy = document.querySelector("#progress-copy");
@@ -178,6 +201,16 @@ const eyebrow = document.querySelector(".eyebrow");
 const subtitle = document.querySelector(".subtitle");
 const loginCopy = document.querySelector(".login-copy");
 const footer = document.querySelector("footer");
+const durationInput = document.createElement("input");
+durationInput.id = "ride-duration";
+durationInput.name = "ride-duration";
+durationInput.type = "number";
+durationInput.min = "0";
+durationInput.max = "24";
+durationInput.step = "0.5";
+durationInput.placeholder = "Approx hrs";
+durationInput.autocomplete = "off";
+durationInput.inputMode = "decimal";
 
 let currentState = { tasks: [] };
 let auth;
@@ -196,6 +229,8 @@ function getActiveList() {
 }
 
 function applyListCopy() {
+  document.body.classList.remove("theme-dates", "theme-bike-rides");
+  document.body.classList.add(activeList.themeClass);
   document.title = activeList.documentTitle;
   if (pageDescription) pageDescription.setAttribute("content", activeList.description);
   eyebrow.textContent = activeList.eyebrow;
@@ -204,6 +239,18 @@ function applyListCopy() {
   loginCopy.textContent = activeList.loginCopy;
   emptyState.textContent = activeList.emptyState;
   input.placeholder = activeList.addPlaceholder;
+  addLabel.textContent = activeList.isRideList ? "Add a new bike ride" : "Add a new thing to do";
+  if (activeList.isRideList) {
+    input.name = "ride-location";
+    input.maxLength = 120;
+    input.required = true;
+    durationInput.required = true;
+    if (!durationInput.isConnected) input.after(durationInput);
+  } else {
+    input.name = "new-task";
+    input.maxLength = 180;
+    durationInput.remove();
+  }
   footer.textContent = "made for two people who are very good at making lists";
 }
 
@@ -266,6 +313,8 @@ function freshList() {
     tasks: activeList.starterTasks.map((task, index) => ({
       id: `${activeList.dbKey}-${index + 1}`,
       text: task.text,
+      ...(task.location ? { location: task.location } : {}),
+      ...(Number.isFinite(task.durationHours) ? { durationHours: task.durationHours } : {}),
       done: Boolean(task.done),
       createdAt: index
     })),
@@ -275,24 +324,79 @@ function freshList() {
 
 function normalizeTasks(tasks) {
   if (Array.isArray(tasks)) {
-    return tasks.filter((task) => task && typeof task.text === "string");
+    return tasks.filter((task) => task && (typeof task.text === "string" || typeof task.location === "string"));
   }
 
   if (tasks && typeof tasks === "object") {
     return Object.entries(tasks)
       .sort(([left], [right]) => Number(left) - Number(right))
       .map(([, task]) => task)
-      .filter((task) => task && typeof task.text === "string");
+      .filter((task) => task && (typeof task.text === "string" || typeof task.location === "string"));
   }
 
   return [];
 }
 
+function parseDurationFromText(text) {
+  const match = String(text || "").match(/^\s*(\d+(?:\.\d+)?)\s*h(?:r|rs|our|ours)?\s*[—-]\s*(.+)$/i);
+  if (!match) return { location: String(text || ""), durationHours: undefined };
+  return { durationHours: Number(match[1]), location: match[2].trim() };
+}
+
+function normalizeTask(task) {
+  const parsed = parseDurationFromText(task.text);
+  const durationHours = Number(task.durationHours ?? parsed.durationHours);
+  const location = String(task.location || parsed.location || task.text || "").trim();
+  const text = activeList.isRideList && location && Number.isFinite(durationHours)
+    ? `${durationHours} ${durationHours === 1 ? "hr" : "hrs"} — ${location}`
+    : task.text;
+
+  return {
+    ...task,
+    text,
+    ...(activeList.isRideList ? { location, durationHours } : {})
+  };
+}
+
 function normalizeState(state) {
   return {
     ...(state && typeof state === "object" ? state : {}),
-    tasks: normalizeTasks(state?.tasks)
+    tasks: normalizeTasks(state?.tasks).map(normalizeTask)
   };
+}
+
+function rideSectionFor(task) {
+  const duration = Number(task.durationHours);
+  return rideSections.find((section) => duration >= section.min && duration < section.max) || rideSections.at(-1);
+}
+
+function renderTask(task) {
+  const item = document.createElement("li");
+  item.className = `todo-item${task.done ? " is-done" : ""}`;
+  const label = document.createElement("label");
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = Boolean(task.done);
+  checkbox.setAttribute("aria-label", `Mark ${task.text} as ${task.done ? "not done" : "done"}`);
+  checkbox.addEventListener("change", () => toggleTask(task.id));
+  const checkmark = document.createElement("span");
+  checkmark.className = "checkmark";
+  checkmark.setAttribute("aria-hidden", "true");
+  checkmark.textContent = "✓";
+  const text = document.createElement("span");
+  text.className = "task-text";
+  text.textContent = activeList.isRideList && task.location ? task.location : task.text;
+  label.append(checkbox, checkmark, text);
+
+  if (activeList.isRideList && Number.isFinite(Number(task.durationHours))) {
+    const badge = document.createElement("span");
+    badge.className = "duration-badge";
+    badge.textContent = `${task.durationHours} ${Number(task.durationHours) === 1 ? "hr" : "hrs"}`;
+    label.append(badge);
+  }
+
+  item.append(label);
+  return item;
 }
 
 function render(state) {
@@ -301,25 +405,23 @@ function render(state) {
   list.replaceChildren();
   emptyState.hidden = tasks.length !== 0;
 
-  for (const task of tasks) {
-    const item = document.createElement("li");
-    item.className = `todo-item${task.done ? " is-done" : ""}`;
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = Boolean(task.done);
-    checkbox.setAttribute("aria-label", `Mark ${task.text} as ${task.done ? "not done" : "done"}`);
-    checkbox.addEventListener("change", () => toggleTask(task.id));
-    const checkmark = document.createElement("span");
-    checkmark.className = "checkmark";
-    checkmark.setAttribute("aria-hidden", "true");
-    checkmark.textContent = "✓";
-    const text = document.createElement("span");
-    text.className = "task-text";
-    text.textContent = task.text;
-    label.append(checkbox, checkmark, text);
-    item.append(label);
-    list.append(item);
+  if (activeList.isRideList) {
+    const groupedTasks = new Map(rideSections.map((section) => [section.label, []]));
+    for (const task of tasks) groupedTasks.get(rideSectionFor(task).label).push(task);
+
+    for (const section of rideSections) {
+      const sectionTasks = groupedTasks.get(section.label)
+        .sort((left, right) => Number(left.durationHours) - Number(right.durationHours));
+      if (!sectionTasks.length) continue;
+
+      const header = document.createElement("li");
+      header.className = "todo-section-heading";
+      header.textContent = section.label;
+      list.append(header);
+      for (const task of sectionTasks) list.append(renderTask(task));
+    }
+  } else {
+    for (const task of tasks) list.append(renderTask(task));
   }
 
   const complete = tasks.filter((task) => task.done).length;
@@ -364,11 +466,25 @@ async function toggleTask(id) {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const text = input.value.trim();
-  if (!text || !todosRef) return;
+  const location = input.value.trim();
+  const durationHours = Number(durationInput.value);
+  if (!location || !todosRef) return;
+  if (activeList.isRideList && !Number.isFinite(durationHours)) {
+    setNote("Add the approximate ride duration in hours too.", true);
+    return;
+  }
   submitButton.disabled = true;
   try {
-    const newTask = { id: crypto.randomUUID(), text, done: false, createdAt: Date.now() };
+    const newTask = activeList.isRideList
+      ? {
+        id: crypto.randomUUID(),
+        location,
+        durationHours,
+        text: `${durationHours} ${durationHours === 1 ? "hr" : "hrs"} — ${location}`,
+        done: false,
+        createdAt: Date.now()
+      }
+      : { id: crypto.randomUUID(), text: location, done: false, createdAt: Date.now() };
     await runTransaction(todosRef, (state) => {
       const normalizedState = normalizeState(state);
       return {
@@ -378,6 +494,7 @@ form.addEventListener("submit", async (event) => {
       };
     });
     input.value = "";
+    durationInput.value = "";
     input.focus();
   } catch (error) {
     setNote("Couldn’t add that just now. Please try again.", true);

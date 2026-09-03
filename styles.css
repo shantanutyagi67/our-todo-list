@@ -23,6 +23,16 @@ body {
   font-family: Manrope, system-ui, sans-serif;
 }
 
+body.theme-bike-rides {
+  --ink: #20333a;
+  --muted: #60787c;
+  --pink: #2f9f9a;
+  --pink-deep: #19746f;
+  --paper: #f8fffb;
+  --line: #cce8df;
+  --yellow: #f4d06f;
+}
+
 body::before {
   position: fixed;
   inset: 0;
@@ -33,6 +43,14 @@ body::before {
     linear-gradient(180deg, #f9e8ed 0%, #fff4e7 48%, #f9e8ed 100%),
     #f9e8ed;
   content: "";
+}
+
+body.theme-bike-rides::before {
+  background:
+    radial-gradient(circle at 10% 7%, #d7fff1 0 8%, transparent 30%),
+    radial-gradient(circle at 92% 88%, #ffe6a7 0 9%, transparent 31%),
+    linear-gradient(180deg, #e7fff8 0%, #fff8df 50%, #e9f7ff 100%),
+    #e7fff8;
 }
 
 .cat-sticker-wall {
@@ -107,6 +125,12 @@ body::before {
   box-shadow: 0 24px 60px rgb(118 59 75 / 15%);
 }
 
+body.theme-bike-rides .todo-card {
+  border-color: rgb(255 255 255 / 86%);
+  background: rgb(248 255 251 / 93%);
+  box-shadow: 0 24px 60px rgb(24 97 99 / 15%);
+}
+
 .todo-card::before {
   position: absolute;
   inset: 11px;
@@ -115,6 +139,8 @@ body::before {
   content: "";
   pointer-events: none;
 }
+
+body.theme-bike-rides .todo-card::before { border-color: #bfe2d9; }
 
 .hero, .login-panel, #app-panel, .progress-wrap, .todo-list, .empty-state, .add-form, .connection-note, footer { position: relative; }
 
@@ -148,6 +174,8 @@ h1 em { color: var(--pink); font-style: italic; }
 .progress-labels { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); font-size: .74rem; font-weight: 800; letter-spacing: .02em; }
 .progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #f2e4e5; }
 #progress-bar { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), #f29db4); transition: width .35s ease; }
+body.theme-bike-rides .progress-track { background: #dcefe9; }
+body.theme-bike-rides #progress-bar { background: linear-gradient(90deg, #2f9f9a, #f0b54d); }
 
 .login-panel { margin: 34px auto 8px; max-width: 390px; }
 .login-copy { margin: 0 0 14px; color: var(--muted); font-size: .86rem; font-weight: 700; text-align: center; }
@@ -164,6 +192,16 @@ h1 em { color: var(--pink); font-style: italic; }
   font-size: .9rem;
 }
 .login-form input:focus, .add-form input:focus { border-color: #e790a9; box-shadow: 0 0 0 4px #fce5eb; }
+body.theme-bike-rides .login-form input,
+body.theme-bike-rides .add-form input {
+  border-color: #c6e5dc;
+  background: #fbfffc;
+}
+body.theme-bike-rides .login-form input:focus,
+body.theme-bike-rides .add-form input:focus {
+  border-color: #4bb7b1;
+  box-shadow: 0 0 0 4px #d8f7ef;
+}
 .login-form button, .add-form button, .account-row button {
   border: 0;
   border-radius: 12px;
@@ -178,6 +216,9 @@ h1 em { color: var(--pink); font-style: italic; }
 }
 .login-form button { min-height: 46px; }
 .login-form button:hover, .add-form button:hover, .account-row button:hover { background: #dc5f83; }
+body.theme-bike-rides .login-form button:hover,
+body.theme-bike-rides .add-form button:hover,
+body.theme-bike-rides .account-row button:hover { background: #268d88; }
 .login-form button:active, .add-form button:active, .account-row button:active { box-shadow: 0 1px 0 var(--pink-deep); transform: translateY(3px); }
 .login-form button:disabled, .add-form button:disabled { cursor: wait; opacity: .65; }
 .account-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 28px 0 0; color: var(--muted); font-size: .74rem; font-weight: 800; }
@@ -187,17 +228,55 @@ h1 em { color: var(--pink); font-style: italic; }
 .todo-list { display: grid; gap: 9px; padding: 0; margin: 0; list-style: none; }
 .todo-item { display: flex; align-items: center; gap: 13px; padding: 12px 13px; border-radius: 13px; transition: background .2s ease, transform .2s ease; }
 .todo-item:hover { background: #fff0f3; transform: translateX(2px); }
+body.theme-bike-rides .todo-item:hover { background: #edfbf6; }
 .todo-item label { display: flex; flex: 1; align-items: center; gap: 13px; min-width: 0; cursor: pointer; }
 .todo-item input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .checkmark { display: grid; flex: 0 0 22px; width: 22px; height: 22px; border: 1.5px solid #d5bbc1; border-radius: 50%; place-items: center; color: white; font-size: .8rem; transition: .2s ease; }
 .todo-item input:focus-visible + .checkmark { outline: 3px solid #f7ccda; outline-offset: 3px; }
 .todo-item input:checked + .checkmark { border-color: var(--pink); background: var(--pink); }
 .task-text { min-width: 0; color: #40343c; font-size: .93rem; font-weight: 700; line-height: 1.38; transition: color .2s ease, text-decoration-color .2s ease; }
+body.theme-bike-rides .task-text { color: #253c42; }
 .todo-item.is-done .task-text { color: #a18e96; text-decoration: line-through; text-decoration-color: #dfacb9; }
+body.theme-bike-rides .todo-item.is-done .task-text { color: #8aa1a1; text-decoration-color: #83c9bd; }
+
+.todo-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 2px;
+  color: var(--pink-deep);
+  font-family: "DM Mono", monospace;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.todo-section-heading::after {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+  content: "";
+}
+
+.duration-badge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #e2f6ef;
+  color: #19746f;
+  font-family: "DM Mono", monospace;
+  font-size: .66rem;
+  font-weight: 800;
+}
 
 .empty-state { padding: 24px 0; margin: 0; color: var(--muted); text-align: center; }
 .add-form { display: flex; gap: 9px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
 .add-form input { flex: 1; }
+.add-form input[type="number"] {
+  flex: 0 0 118px;
+}
 .add-form button { padding: 0 17px; }
 .add-form button span { font-size: 1.2rem; vertical-align: -1px; }
 
@@ -235,15 +314,19 @@ footer { margin-top: 25px; color: #aa929a; font-family: "DM Mono", monospace; fo
   .progress-wrap { margin: 22px 0 10px; }
   .progress-labels { font-size: .66rem; }
   .todo-list { gap: 3px; }
+  .todo-section-heading { margin-top: 10px; font-size: .58rem; }
   .todo-item { padding: 6px 3px; gap: 8px; border-radius: 10px; }
   .todo-item:hover { transform: none; }
   .todo-item label { gap: 8px; }
   .checkmark { flex-basis: 18px; width: 18px; height: 18px; font-size: .65rem; }
   .task-text { font-size: .76rem; line-height: 1.24; }
+  .duration-badge { padding: 4px 6px; font-size: .55rem; }
   .account-row { align-items: center; margin-top: 17px; }
   .account-row button { padding: 8px 10px; }
   .add-form { gap: 7px; margin-top: 14px; padding-top: 14px; }
+  body.theme-bike-rides .add-form { display: grid; grid-template-columns: 1fr 92px auto; }
   .add-form input { padding: 10px 11px; font-size: .78rem; }
+  .add-form input[type="number"] { min-width: 0; }
   .add-form button { padding: 0 13px; }
   .connection-note { min-height: 14px; margin-top: 8px; }
   footer { margin-top: 14px; font-size: .55rem; }
