@@ -208,10 +208,24 @@ durationInput.inputMode = "decimal";
 
 let currentState = { tasks: [] };
 let auth;
+let database;
 let todosRef;
 let unsubscribeTodos;
 let activeList = getActiveList();
 let isManualLoginInProgress = false;
+let currentAccessLevel = null;
+
+function canWrite() {
+  return currentAccessLevel === "write";
+}
+
+function setReadOnlyMode(isReadOnly) {
+  document.body.classList.toggle("is-read-only", isReadOnly);
+  form.querySelectorAll("input, button").forEach((element) => {
+    element.disabled = isReadOnly;
+  });
+  form.setAttribute("aria-disabled", String(isReadOnly));
+}
 
 function deviceLoginKey(user) {
   return `things-we-shall-do:list-login:${activeList.dbKey}:${user.uid}`;
@@ -403,6 +417,7 @@ function renderTask(task) {
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.checked = Boolean(task.done);
+  checkbox.disabled = !canWrite();
   checkbox.setAttribute("aria-label", `Mark ${task.text} as ${task.done ? "not done" : "done"}`);
   checkbox.addEventListener("change", () => toggleTask(task.id));
   const checkmark = document.createElement("span");
@@ -464,6 +479,8 @@ function render(state) {
 function showLogin(message = "") {
   appPanel.hidden = true;
   loginPanel.hidden = false;
+  currentAccessLevel = null;
+  setReadOnlyMode(false);
   setLoginNote(message);
   accountEmail.textContent = "";
   if (unsubscribeTodos) {
@@ -479,6 +496,11 @@ function showApp(user) {
 }
 
 async function toggleTask(id) {
+  if (!canWrite()) {
+    setNote("This account has read-only access to this list.", true);
+    return;
+  }
+
   try {
     await runTransaction(todosRef, (state) => {
       const normalizedState = normalizeState(state);
@@ -496,6 +518,11 @@ async function toggleTask(id) {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!canWrite()) {
+    setNote("This account has read-only access to this list.", true);
+    return;
+  }
+
   const location = input.value.trim();
   const durationHours = Number(durationInput.value);
   if (!location || !todosRef) return;
@@ -560,6 +587,12 @@ signOutButton.addEventListener("click", async () => {
   await signOut(auth);
 });
 
+async function getAccessLevelForUser(user) {
+  const accessSnapshot = await get(ref(database, `todoAccess/${activeList.dbKey}/${user.uid}`));
+  const accessValue = accessSnapshot.val();
+  return accessValue === "read" || accessValue === "write" ? accessValue : null;
+}
+
 async function openListForUser(user) {
   if (unsubscribeTodos) {
     unsubscribeTodos();
@@ -569,11 +602,28 @@ async function openListForUser(user) {
   showApp(user);
   setNote("Loading the shared list...");
   try {
+    currentAccessLevel = await getAccessLevelForUser(user);
+    const isReadOnly = currentAccessLevel === "read";
+    const isWriteAllowed = currentAccessLevel === "write";
+    setReadOnlyMode(!isWriteAllowed);
+
+    if (!currentAccessLevel) {
+      setNote("This account is signed in, but it is not approved for the list yet.", true);
+      render({ tasks: [] });
+      return;
+    }
+
     const firstRead = await get(todosRef);
-    if (!firstRead.exists()) await set(todosRef, freshList());
+    if (!firstRead.exists() && isWriteAllowed) await set(todosRef, freshList());
+    if (!firstRead.exists() && isReadOnly) {
+      render({ tasks: [] });
+      setNote("This account has read-only access, but the list has not been created yet.", true);
+      return;
+    }
+
     unsubscribeTodos = onValue(todosRef, (snapshot) => {
       render(snapshot.val());
-      setNote("");
+      setNote(isReadOnly ? "Read-only view — this account cannot change the list." : "");
     }, () => {
       setNote("This account is signed in, but it is not approved for the list yet.", true);
     });
@@ -596,7 +646,8 @@ async function start() {
     const app = initializeApp(config);
     auth = getAuth(app);
     await setPersistence(auth, browserLocalPersistence);
-    todosRef = ref(getDatabase(app), `sharedTodos/${activeList.dbKey}`);
+    database = getDatabase(app);
+    todosRef = ref(database, `sharedTodos/${activeList.dbKey}`);
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
