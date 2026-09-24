@@ -195,6 +195,18 @@ const eyebrow = document.querySelector(".eyebrow");
 const subtitle = document.querySelector(".subtitle");
 const loginCopy = document.querySelector(".login-copy");
 const footer = document.querySelector("footer");
+const listModeSwitcher = document.createElement("div");
+listModeSwitcher.className = "list-mode-switcher";
+listModeSwitcher.setAttribute("aria-label", "Choose list type");
+const sharedModeButton = document.createElement("button");
+sharedModeButton.type = "button";
+sharedModeButton.dataset.mode = "shared";
+sharedModeButton.textContent = "Shared list";
+const privateModeButton = document.createElement("button");
+privateModeButton.type = "button";
+privateModeButton.dataset.mode = "private";
+privateModeButton.textContent = "My list";
+listModeSwitcher.append(sharedModeButton, privateModeButton);
 const durationInput = document.createElement("input");
 durationInput.id = "ride-duration";
 durationInput.name = "ride-duration";
@@ -213,10 +225,22 @@ let todosRef;
 let unsubscribeTodos;
 let activeList = getActiveList();
 let isManualLoginInProgress = false;
-let currentAccessLevel = null;
+let currentAccessValue = null;
+let currentUser = null;
+let currentListMode = "shared";
 
 function canWrite() {
-  return currentAccessLevel === "write";
+  if (!hasListAccess()) return false;
+  if (currentListMode === "private") return true;
+  return currentAccessValue === true || currentAccessValue === "write";
+}
+
+function hasListAccess() {
+  return currentAccessValue === true || currentAccessValue === "read" || currentAccessValue === "write";
+}
+
+function isSharedReadOnly() {
+  return currentListMode === "shared" && currentAccessValue === "read";
 }
 
 function setReadOnlyMode(isReadOnly) {
@@ -225,6 +249,42 @@ function setReadOnlyMode(isReadOnly) {
     element.disabled = isReadOnly;
   });
   form.setAttribute("aria-disabled", String(isReadOnly));
+}
+
+function listModeStorageKey(user) {
+  return `things-we-shall-do:list-mode:${activeList.dbKey}:${user.uid}`;
+}
+
+function rememberListMode(user) {
+  try {
+    window.localStorage.setItem(listModeStorageKey(user), currentListMode);
+  } catch (error) {
+    // Ignore storage failures; the shared list remains the default.
+  }
+}
+
+function restoreListMode(user) {
+  try {
+    const savedMode = window.localStorage.getItem(listModeStorageKey(user));
+    currentListMode = savedMode === "private" ? "private" : "shared";
+  } catch (error) {
+    currentListMode = "shared";
+  }
+}
+
+function syncListModeSwitcher() {
+  sharedModeButton.classList.toggle("is-active", currentListMode === "shared");
+  privateModeButton.classList.toggle("is-active", currentListMode === "private");
+  sharedModeButton.setAttribute("aria-pressed", String(currentListMode === "shared"));
+  privateModeButton.setAttribute("aria-pressed", String(currentListMode === "private"));
+}
+
+function updateTodosRef() {
+  if (!database) return;
+  const path = currentListMode === "private" && currentUser
+    ? `privateTodos/${currentUser.uid}/${activeList.dbKey}`
+    : `sharedTodos/${activeList.dbKey}`;
+  todosRef = ref(database, path);
 }
 
 function deviceLoginKey(user) {
@@ -291,6 +351,12 @@ function applyListCopy() {
   footer.textContent = "made for two people who are very good at making lists";
 }
 
+function installListModeSwitcher() {
+  const accountRow = document.querySelector(".account-row");
+  if (accountRow && !listModeSwitcher.isConnected) accountRow.after(listModeSwitcher);
+  syncListModeSwitcher();
+}
+
 function stickerCountForViewport() {
   if (window.matchMedia("(max-width: 500px)").matches) return 12;
   if (window.matchMedia("(max-width: 820px)").matches) return 16;
@@ -346,32 +412,63 @@ function loginEmailFor(identifier) {
 }
 
 function freshList() {
-  return {
-    tasks: activeList.starterTasks.map((task, index) => ({
+  const tasks = activeList.starterTasks.map((task, index) => ({
       id: `${activeList.dbKey}-${index + 1}`,
       text: task.text,
       ...(task.location ? { location: task.location } : {}),
       ...(Number.isFinite(task.durationHours) ? { durationHours: task.durationHours } : {}),
       done: Boolean(task.done),
       createdAt: index
-    })),
+    }));
+
+  return {
+    tasks: taskRecordFromList(tasks),
     updatedAt: Date.now()
   };
 }
 
 function normalizeTasks(tasks) {
   if (Array.isArray(tasks)) {
-    return tasks.filter((task) => task && (typeof task.text === "string" || typeof task.location === "string"));
+    return tasks
+      .map((task, index) => normalizeTaskShape(task, index))
+      .filter(Boolean);
   }
 
   if (tasks && typeof tasks === "object") {
     return Object.entries(tasks)
-      .sort(([left], [right]) => Number(left) - Number(right))
-      .map(([, task]) => task)
-      .filter((task) => task && (typeof task.text === "string" || typeof task.location === "string"));
+      .map(([key, task], index) => normalizeTaskShape(task, index, key))
+      .filter(Boolean)
+      .sort(compareTasks);
   }
 
   return [];
+}
+
+function normalizeTaskShape(task, index, key) {
+  if (!task || (typeof task.text !== "string" && typeof task.location !== "string")) return null;
+  const fallbackId = key || `${activeList.dbKey}-legacy-${index}`;
+  return {
+    ...task,
+    id: String(task.id || fallbackId)
+  };
+}
+
+function compareTasks(left, right) {
+  const leftCreated = Number(left.createdAt);
+  const rightCreated = Number(right.createdAt);
+  if (Number.isFinite(leftCreated) && Number.isFinite(rightCreated) && leftCreated !== rightCreated) {
+    return leftCreated - rightCreated;
+  }
+
+  return String(left.text || left.location || "").localeCompare(String(right.text || right.location || ""));
+}
+
+function taskRecordFromList(tasks) {
+  return tasks.reduce((record, task) => {
+    if (!task?.id) return record;
+    record[task.id] = task;
+    return record;
+  }, {});
 }
 
 function parseDurationFromText(text) {
@@ -384,9 +481,10 @@ function normalizeTask(task) {
   const parsed = parseDurationFromText(task.text);
   const durationHours = Number(task.durationHours ?? parsed.durationHours);
   const location = String(task.location || parsed.location || task.text || "").trim();
+  const baseText = String(task.text || task.location || "").trim();
   const text = activeList.isRideList && location && Number.isFinite(durationHours)
     ? `${durationHours} ${durationHours === 1 ? "hr" : "hrs"} — ${location}`
-    : task.text;
+    : baseText;
 
   return {
     ...task,
@@ -399,6 +497,14 @@ function normalizeState(state) {
   return {
     ...(state && typeof state === "object" ? state : {}),
     tasks: normalizeTasks(state?.tasks).map(normalizeTask)
+  };
+}
+
+function serializeState(state) {
+  const normalizedState = normalizeState(state);
+  return {
+    ...normalizedState,
+    tasks: taskRecordFromList(normalizedState.tasks)
   };
 }
 
@@ -437,6 +543,17 @@ function renderTask(task) {
   }
 
   item.append(label);
+
+  if (canWrite()) {
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-task";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
+    deleteButton.setAttribute("aria-label", `Delete ${task.text}`);
+    deleteButton.addEventListener("click", () => deleteTask(task.id, task.text));
+    item.append(deleteButton);
+  }
+
   return item;
 }
 
@@ -479,7 +596,10 @@ function render(state) {
 function showLogin(message = "") {
   appPanel.hidden = true;
   loginPanel.hidden = false;
-  currentAccessLevel = null;
+  currentAccessValue = null;
+  currentUser = null;
+  currentListMode = "shared";
+  syncListModeSwitcher();
   setReadOnlyMode(false);
   setLoginNote(message);
   accountEmail.textContent = "";
@@ -493,11 +613,12 @@ function showApp(user) {
   loginPanel.hidden = true;
   appPanel.hidden = false;
   accountEmail.textContent = user.email === usernameAliases.admin ? "admin" : user.email || "Signed in";
+  installListModeSwitcher();
 }
 
 async function toggleTask(id) {
   if (!canWrite()) {
-    setNote("This account has read-only access to this list.", true);
+    setNote("This account has read-only access to the shared list. Switch to My list to edit privately.", true);
     return;
   }
 
@@ -505,21 +626,44 @@ async function toggleTask(id) {
     await runTransaction(todosRef, (state) => {
       const normalizedState = normalizeState(state);
       if (!normalizedState.tasks.length) return state;
-      return {
+      return serializeState({
         ...normalizedState,
         tasks: normalizedState.tasks.map((task) => task.id === id ? { ...task, done: !task.done } : task),
         updatedAt: Date.now()
-      };
+      });
     });
   } catch (error) {
     setNote("Couldn’t save that change. Please try again.", true);
   }
 }
 
+async function deleteTask(id, text) {
+  if (!canWrite()) {
+    setNote("This account has read-only access to the shared list. Switch to My list to edit privately.", true);
+    return;
+  }
+
+  const confirmed = window.confirm(`Delete "${text}"?`);
+  if (!confirmed) return;
+
+  try {
+    await runTransaction(todosRef, (state) => {
+      const normalizedState = normalizeState(state);
+      return serializeState({
+        ...normalizedState,
+        tasks: normalizedState.tasks.filter((task) => task.id !== id),
+        updatedAt: Date.now()
+      });
+    });
+  } catch (error) {
+    setNote("Couldn’t delete that just now. Please try again.", true);
+  }
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!canWrite()) {
-    setNote("This account has read-only access to this list.", true);
+    setNote("This account has read-only access to the shared list. Switch to My list to edit privately.", true);
     return;
   }
 
@@ -544,11 +688,11 @@ form.addEventListener("submit", async (event) => {
       : { id: crypto.randomUUID(), text: location, done: false, createdAt: Date.now() };
     await runTransaction(todosRef, (state) => {
       const normalizedState = normalizeState(state);
-      return {
+      return serializeState({
         ...normalizedState,
         tasks: [...normalizedState.tasks, newTask],
         updatedAt: Date.now()
-      };
+      });
     });
     input.value = "";
     durationInput.value = "";
@@ -582,6 +726,19 @@ loginForm.addEventListener("submit", async (event) => {
   }
 });
 
+listModeSwitcher.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-mode]");
+  if (!button || !currentUser) return;
+  const nextMode = button.dataset.mode === "private" ? "private" : "shared";
+  if (nextMode === currentListMode) return;
+
+  currentListMode = nextMode;
+  rememberListMode(currentUser);
+  syncListModeSwitcher();
+  updateTodosRef();
+  await openListForUser(currentUser);
+});
+
 signOutButton.addEventListener("click", async () => {
   if (auth.currentUser) forgetDeviceLoginForList(auth.currentUser);
   await signOut(auth);
@@ -589,8 +746,20 @@ signOutButton.addEventListener("click", async () => {
 
 async function getAccessLevelForUser(user) {
   const accessSnapshot = await get(ref(database, `todoAccess/${activeList.dbKey}/${user.uid}`));
-  const accessValue = accessSnapshot.val();
-  return accessValue === "read" || accessValue === "write" ? accessValue : null;
+  return accessSnapshot.val();
+}
+
+function emptyPrivateList() {
+  return {
+    tasks: {},
+    updatedAt: Date.now()
+  };
+}
+
+function noteForCurrentMode() {
+  if (currentListMode === "private") return "My private list — only this account can see and change it.";
+  if (isSharedReadOnly()) return "Shared read-only view — switch to My list to edit privately.";
+  return "";
 }
 
 async function openListForUser(user) {
@@ -599,31 +768,38 @@ async function openListForUser(user) {
     unsubscribeTodos = undefined;
   }
 
+  currentUser = user;
+  restoreListMode(user);
+  updateTodosRef();
   showApp(user);
-  setNote("Loading the shared list...");
+  setNote(`Loading ${currentListMode === "private" ? "your private list" : "the shared list"}...`);
   try {
-    currentAccessLevel = await getAccessLevelForUser(user);
-    const isReadOnly = currentAccessLevel === "read";
-    const isWriteAllowed = currentAccessLevel === "write";
-    setReadOnlyMode(!isWriteAllowed);
+    currentAccessValue = await getAccessLevelForUser(user);
+    setReadOnlyMode(!canWrite());
 
-    if (!currentAccessLevel) {
+    if (!hasListAccess()) {
       setNote("This account is signed in, but it is not approved for the list yet.", true);
       render({ tasks: [] });
       return;
     }
 
     const firstRead = await get(todosRef);
-    if (!firstRead.exists() && isWriteAllowed) await set(todosRef, freshList());
-    if (!firstRead.exists() && isReadOnly) {
+    if (!firstRead.exists() && currentListMode === "private") await set(todosRef, emptyPrivateList());
+    if (!firstRead.exists() && currentListMode === "shared" && canWrite()) await set(todosRef, freshList());
+    if (!firstRead.exists() && currentListMode === "shared" && !canWrite()) {
       render({ tasks: [] });
-      setNote("This account has read-only access, but the list has not been created yet.", true);
+      setNote("This account has read-only access, but the shared list has not been created yet.", true);
       return;
+    }
+
+    if (canWrite()) {
+      await runTransaction(todosRef, (state) => state ? serializeState(state) : state);
     }
 
     unsubscribeTodos = onValue(todosRef, (snapshot) => {
       render(snapshot.val());
-      setNote(isReadOnly ? "Read-only view — this account cannot change the list." : "");
+      setReadOnlyMode(!canWrite());
+      setNote(noteForCurrentMode());
     }, () => {
       setNote("This account is signed in, but it is not approved for the list yet.", true);
     });
@@ -647,7 +823,7 @@ async function start() {
     auth = getAuth(app);
     await setPersistence(auth, browserLocalPersistence);
     database = getDatabase(app);
-    todosRef = ref(database, `sharedTodos/${activeList.dbKey}`);
+    updateTodosRef();
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {

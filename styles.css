@@ -144,7 +144,7 @@ body.theme-bike-rides .todo-card {
 
 body.theme-bike-rides .todo-card::before { border-color: #bfe2d9; }
 
-.hero, .login-panel, #app-panel, .progress-wrap, .todo-list, .empty-state, .add-form, .connection-note, footer { position: relative; }
+.hero, .login-panel, #app-panel, .progress-wrap, .todo-list, .empty-state, .add-form, .connection-note, footer, .list-mode-switcher { position: relative; }
 
 .hero { text-align: center; }
 .eyebrow {
@@ -228,6 +228,41 @@ body.theme-bike-rides .account-row button:hover { background: #268d88; }
 .account-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .account-row button { flex: 0 0 auto; padding: 9px 12px; font-size: .72rem; box-shadow: 0 3px 0 var(--pink-deep); }
 
+.list-mode-switcher {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin: 18px auto 0;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 58%);
+}
+
+.list-mode-switcher button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: .73rem;
+  font-weight: 900;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.list-mode-switcher button.is-active {
+  background: var(--pink);
+  color: white;
+  box-shadow: 0 3px 0 var(--pink-deep);
+}
+
+.list-mode-switcher button:not(.is-active):hover {
+  background: rgb(255 255 255 / 70%);
+  color: var(--ink);
+}
+
 .todo-list { display: grid; gap: 9px; padding: 0; margin: 0; list-style: none; }
 .todo-item { display: flex; align-items: center; gap: 13px; padding: 12px 13px; border-radius: 13px; transition: background .2s ease, transform .2s ease; }
 .todo-item:hover { background: #fff0f3; transform: translateX(2px); }
@@ -273,6 +308,36 @@ body.theme-bike-rides .todo-item.is-done .task-text { color: #8aa1a1; text-decor
   font-family: "DM Mono", monospace;
   font-size: .66rem;
   font-weight: 800;
+}
+
+.delete-task {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 6px 9px;
+  background: #ffe7eb;
+  color: #b94464;
+  font: inherit;
+  font-size: .64rem;
+  font-weight: 900;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.delete-task:hover {
+  background: #f7cbd5;
+  color: #92324f;
+  transform: translateY(-1px);
+}
+
+body.theme-bike-rides .delete-task {
+  background: #dff5ee;
+  color: #19746f;
+}
+
+body.theme-bike-rides .delete-task:hover {
+  background: #c6e8de;
+  color: #105d59;
 }
 
 @media (min-width: 860px) {
@@ -352,8 +417,11 @@ footer { margin-top: 25px; color: #aa929a; font-family: "DM Mono", monospace; fo
   .checkmark { flex-basis: 18px; width: 18px; height: 18px; font-size: .65rem; }
   .task-text { font-size: .76rem; line-height: 1.24; }
   .duration-badge { padding: 4px 6px; font-size: .55rem; }
+  .delete-task { padding: 5px 7px; font-size: .55rem; }
   .account-row { align-items: center; margin-top: 17px; }
   .account-row button { padding: 8px 10px; }
+  .list-mode-switcher { margin-top: 12px; }
+  .list-mode-switcher button { min-height: 32px; font-size: .66rem; }
   .add-form { gap: 7px; margin-top: 14px; padding-top: 14px; }
   body.theme-bike-rides .add-form { display: grid; grid-template-columns: 1fr 92px auto; }
   .add-form input { padding: 10px 11px; font-size: .78rem; }
